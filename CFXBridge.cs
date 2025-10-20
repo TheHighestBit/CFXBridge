@@ -124,7 +124,7 @@ public class CFXBridge
         var payload = (string)input.dataJSON;
         var message = CFXJsonSerializer.DeserializeObject<CFXMessage>(payload);
 
-        endpoint.PublishToChannel(new CFXEnvelope(message), new AmqpChannelAddress { Address = (string)input.amqpTarget });
+        endpoint.PublishToChannel(new CFXEnvelope(message), new AmqpChannelAddress { Uri = new Uri((string)input.brokerUri), Address = (string)input.amqpTarget });
 
         return Task.FromResult<object?>(null);
     }
@@ -159,6 +159,26 @@ public class CFXBridge
 
         endpoint.OnCFXMessageReceived += handler;
         _messageHandlers[endpointHandle] = handler;
+
+        return Task.FromResult<object?>(null);
+    }
+
+    public Task<object?> UnregisterListenerCallback(dynamic input)
+    {
+        string endpointHandle = (string)input.handle;
+        AmqpCFXEndpoint? endpoint;
+        if (!_endpointMap.TryGetValue(endpointHandle, out endpoint))
+        {
+            throw new Exception($"No endpoint with the handle '{endpointHandle}' is currently open.");
+        }
+        else if (!_messageHandlers.ContainsKey(endpointHandle))
+        {
+            throw new Exception("No message handler is registered for this endpoint.");
+        }
+
+        var handler = _messageHandlers[endpointHandle];
+        endpoint.OnCFXMessageReceived -= handler;
+        _messageHandlers.Remove(endpointHandle);
 
         return Task.FromResult<object?>(null);
     }
