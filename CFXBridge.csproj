@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CFX.CFXSDK" Version="2.0.5" />
+    <ProjectReference Include="..\CFX\CFX\CFX.csproj" />
   </ItemGroup>
 
 </Project>

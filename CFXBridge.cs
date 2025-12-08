@@ -148,8 +148,9 @@ public class CFXBridge
         CFXMessageReceivedHandler handler = async (AmqpChannelAddress source, CFXEnvelope message) =>
         {
             try
-            {
-                await callback(message);
+            {   
+                string jsonMessage = message.ToJson();
+                await callback(jsonMessage);
             }
             catch
             {
